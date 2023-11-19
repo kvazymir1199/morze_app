@@ -1,7 +1,7 @@
-/test.py
-/main.spec
-/myfirstfile.txt
-/test_variant_2
-/build
-/dist
-/.idea
+test.py
+main.spec
+myfirstfile.txt
+test_variant_2
+build/
+dist/
+.idea/
