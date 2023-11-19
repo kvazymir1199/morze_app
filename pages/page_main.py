@@ -3,13 +3,10 @@ from datetime import datetime
 
 from PySide2.QtCore import QTimer
 from PySide2.QtGui import QFont, Qt
-from PySide2.QtWidgets import (QApplication, QWidget, QHBoxLayout, QFileDialog,
-                               QLabel, QTextEdit)
-
+from PySide2.QtWidgets import QWidget, QFileDialog, QLabel
 from pages.page_generate_file import GeneratePageWindow
 from pages.page_show_result import ResultWindow
-from PySide2.QtWidgets import QPushButton
-from utils import morse_to_text
+from utils import morse_to_text, create_textfield, create_button
 
 BUTTON_SIZE = (150, 50)
 layout = (15, 50)
@@ -18,9 +15,10 @@ TEXTFIELD_SIZE = (750, 120)
 
 
 class MainWindow(QWidget):
-
     def __init__(self):
+        """ Класс для создания и отображения основного окна программы"""
         super().__init__()
+        self.new_window = GeneratePageWindow()
         self.last_time_button_pressed = 0  # время последнего нажатия кнопки
         self.key_press_time = None  # время зажатия кнопки
         self.setWindowTitle("Основное меню")  # присваивает окну название
@@ -36,64 +34,72 @@ class MainWindow(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_time)
         self.timer.start(1000)
-        self.button = self.create_button(
+        self.button = create_button(
+            self,
             name="Открыть файл",
             func=self.read_file,
             x=layout[0],
             y=layout[1],
-            height=BUTTON_SIZE[0],
+            length=BUTTON_SIZE[0],
             width=BUTTON_SIZE[1]
         )
-        self.button = self.create_button(
+        self.button = create_button(
+            self,
             name="Генерация файла",
             func=self.generate_new_file,
             x=layout[0] + BUTTON_SIZE[0] + SHIFT_BUTTON,
             y=layout[1],
-            height=BUTTON_SIZE[0],
+            length=BUTTON_SIZE[0],
             width=BUTTON_SIZE[1]
         )
-        self.button = self.create_button(
+        self.button = create_button(
+            self,
             name="Выполнить проверку",
             func=self.return_result,
             x=layout[0] + (BUTTON_SIZE[0] + SHIFT_BUTTON) * 2,
             y=layout[1],
-            height=BUTTON_SIZE[0] * 2,
+            length=BUTTON_SIZE[0] * 2,
             width=BUTTON_SIZE[1]
         )
-        self.button = self.create_button(
+        self.button = create_button(
+            self,
             name="Стоп",
             func=self.stop_timer,
             x=layout[0] + (BUTTON_SIZE[0] + SHIFT_BUTTON) * 4,
             y=layout[1],
-            height=BUTTON_SIZE[0] // 2,
+            length=BUTTON_SIZE[0] // 2,
             width=BUTTON_SIZE[1]
         )
-        self.button = self.create_button(
+        self.button = create_button(
+            self,
             name="Старт",
             func=self.start_timer,
             x=layout[0] + (BUTTON_SIZE[0] + SHIFT_BUTTON) * 4.5,
             y=layout[1],
-            height=BUTTON_SIZE[0] // 2,
+            length=BUTTON_SIZE[0] // 2,
             width=BUTTON_SIZE[1]
         )
-        self.label_task_text = self.create_label(layout[0], 140)
-
-        self.label_text_translate = self.create_label(layout[0], 280)
-
-        self.label_morse_code = self.create_label(
+        self.label_task_text = create_textfield(
+            self,
             layout[0],
-            420,
-            self.on_text_changed
+            140,
+            *TEXTFIELD_SIZE
         )
 
-    def create_label(self, x, y, func=None):
-        label = QTextEdit(self)
-        label.setReadOnly(True)
-        label.move(x, y)
-        label.setFixedSize(*TEXTFIELD_SIZE)
-        label.setStyleSheet("QTextEdit {border: 3px solid #1966FF; }")
-        label.textChanged.connect(func)
-        return label
+        self.label_translate_text = create_textfield(
+            self,
+            layout[0],
+            280,
+            *TEXTFIELD_SIZE
+        )
+
+        self.label_morse_code = create_textfield(
+            self,
+            layout[0],
+            420,
+            func=self.on_text_changed,
+            *TEXTFIELD_SIZE
+        )
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_W:
@@ -107,12 +113,10 @@ class MainWindow(QWidget):
                             self.label_morse_code.toPlainText()[-1] != " ":
                         self.label_morse_code.setText(
                             self.label_morse_code.toPlainText() + " ")
-            print("Клавиша нажата")
         self.key_press_time = time.time()
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_W and not event.isAutoRepeat():
-            print("Клавиша отпущена")
             self.last_time_button_pressed = time.time()
             total_push_time = self.last_time_button_pressed - self.key_press_time
             if 0.15 < total_push_time <= 0.70:
@@ -123,15 +127,11 @@ class MainWindow(QWidget):
                     self.label_morse_code.toPlainText() + ".")
 
     def on_text_changed(self):
-        self.label_text_translate.setText(
-            morse_to_text(self.label_morse_code.toPlainText()))
-
-    def create_button(self, name, func, x, y, height, width):
-        self.button = QPushButton(name, self)
-        self.button.clicked.connect(func)
-        self.button.move(x, y)
-        self.button.resize(height, width)
-        return self.button
+        self.label_translate_text.setText(
+            morse_to_text(
+                self.label_morse_code.toPlainText()
+            )
+        )
 
     def update_time(self):
         if self.start_time == 0:
@@ -141,7 +141,7 @@ class MainWindow(QWidget):
         self.label.setText(f"{minutes:02d}:{seconds:02d}")
 
     def generate_new_file(self):
-        self.new_window = GeneratePageWindow()
+
         self.new_window.show()
 
     def read_file(self):
@@ -160,7 +160,7 @@ class MainWindow(QWidget):
         data = {
             "time": (minutes, seconds),
             "initial_text": self.label_task_text.toPlainText(),
-            "verifiable_text": self.label_text_translate.toPlainText(),
+            "verifiable_text": self.label_translate_text.toPlainText(),
         }
         self.new_window = ResultWindow(data=data)
         self.new_window.show()
@@ -173,7 +173,7 @@ class MainWindow(QWidget):
         self.timer.start()
         self.start_time = datetime.now()
         self.label_morse_code.setText("")
-        self.label_text_translate.setText('')
+        self.label_translate_text.setText('')
         self.last_time_button_pressed = 0
 
     def stop_timer(self):
