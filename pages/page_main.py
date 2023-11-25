@@ -2,11 +2,15 @@ import time
 from datetime import datetime
 
 from PySide2.QtCore import QTimer
-from PySide2.QtGui import QFont, Qt
-from PySide2.QtWidgets import QWidget, QFileDialog, QLabel
+from PySide2.QtGui import Qt
+from PySide2.QtWidgets import QWidget, QFileDialog
 from pages.page_generate_file import GeneratePageWindow
 from pages.page_show_result import ResultWindow
-from utils import morse_to_text, create_textfield, create_button
+from utils import (morse_to_text,
+                   create_textfield,
+                   create_button,
+                   create_label,
+                   Timer)
 
 BUTTON_SIZE = (150, 50)
 layout = (15, 50)
@@ -18,22 +22,34 @@ class MainWindow(QWidget):
     def __init__(self):
         """ Класс для создания и отображения основного окна программы"""
         super().__init__()
-        self.new_window = GeneratePageWindow()
-        self.last_time_button_pressed = 0  # время последнего нажатия кнопки
-        self.key_press_time = None  # время зажатия кнопки
         self.setWindowTitle("Основное меню")  # присваивает окну название
         self.setFixedSize(780, 560)  # задает размер окна
+
+        self.timer_for_label = Timer()
+
+        self.last_time_button_pressed = 0  # время последнего нажатия кнопки
+        self.key_press_time = None  # время зажатия кнопки
+
         self.start_time = 0  # время счетчика
         # Таймер
-        self.label = QLabel("00:00", self)  # лейбл для счетчика
-        # Устанавливаем координаты относительно основного окна
-        self.label.move(layout[0], 10)
-        self.label.setFont(QFont('Arial', 15))
-        self.label.setStyleSheet(
-            "QLabel { background-color: #FF0000; color: #FFFFFF; border: 2px solid #000000; }")
         self.timer = QTimer()
-        self.timer.timeout.connect(self.update_time)
-        self.timer.start(1000)
+        self.timer.timeout.connect(
+            self.update_time
+        )  # тут связываем с функцией для обновления раз в секунду
+        self.timer.start(1000)  # тут задаем ему скорость
+        self.label = create_label(
+            self,
+            text="00:00",
+            x=layout[0],
+            y=10,
+            font_size=15
+        )  # вот тут создаю лейбл для таймера
+        self.label.setStyleSheet(
+            ("QLabel {"
+             " background-color: #FF0000;"
+             " color: #FFFFFF;"
+             " border: 2px solid #000000;"
+             "}"))
         self.button = create_button(
             self,
             name="Открыть файл",
@@ -101,14 +117,18 @@ class MainWindow(QWidget):
             *TEXTFIELD_SIZE
         )
 
+    def update_time(self):
+        minutes, seconds = divmod(self.timer_for_label.get_elapsed_time(), 60)
+        self.label.setText(f"{int(minutes):02d}:{int(seconds):02d}")
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_W:
             if self.last_time_button_pressed != 0:
-                if time.time() - self.last_time_button_pressed > 2:
+                if time.time() - self.last_time_button_pressed > 1.05:
                     if self.label_morse_code.toPlainText()[-1] != "   ":
                         self.label_morse_code.setText(
                             self.label_morse_code.toPlainText() + "  ")
-                elif time.time() - self.last_time_button_pressed > 0.7:
+                elif time.time() - self.last_time_button_pressed > 0.45:
                     if len(self.label_morse_code.toPlainText()[-1]) > 0 and \
                             self.label_morse_code.toPlainText()[-1] != " ":
                         self.label_morse_code.setText(
@@ -119,7 +139,7 @@ class MainWindow(QWidget):
         if event.key() == Qt.Key_W and not event.isAutoRepeat():
             self.last_time_button_pressed = time.time()
             total_push_time = self.last_time_button_pressed - self.key_press_time
-            if 0.15 < total_push_time <= 0.70:
+            if 0.15 < total_push_time <= 0.45:
                 self.label_morse_code.setText(
                     self.label_morse_code.toPlainText() + "-")
             elif total_push_time <= 0.15:
@@ -133,19 +153,13 @@ class MainWindow(QWidget):
             )
         )
 
-    def update_time(self):
-        if self.start_time == 0:
-            return
-        elapsed_time = datetime.now() - self.start_time
-        minutes, seconds = divmod(elapsed_time.seconds, 60)
-        self.label.setText(f"{minutes:02d}:{seconds:02d}")
-
     def generate_new_file(self):
-
+        self.new_window = GeneratePageWindow()
         self.new_window.show()
 
     def read_file(self):
-
+        self.label_translate_text.setStyleSheet(
+            "QTextEdit {border: 3px solid #1966FF; }")
         filename, _ = QFileDialog.getOpenFileName()
         if filename:
             with open(filename, 'r') as f:
@@ -153,28 +167,28 @@ class MainWindow(QWidget):
             self.label_task_text.setText(data)
 
     def return_result(self):
-        if self.start_time == 0:
-            return
-        elapsed_time = datetime.now() - self.start_time
-        minutes, seconds = divmod(elapsed_time.seconds, 60)
+        minutes, seconds = divmod(self.timer_for_label.get_elapsed_time(), 60)
         data = {
-            "time": (minutes, seconds),
+            "time": (minutes, int(seconds)),
             "initial_text": self.label_task_text.toPlainText(),
             "verifiable_text": self.label_translate_text.toPlainText(),
         }
-        self.new_window = ResultWindow(data=data)
-        self.new_window.show()
-        self.start_time = 0
+        self.result_window = ResultWindow(data=data)
+        self.label_translate_text.setText(
+            self.result_window.show_mistakes(data=data)
+        )
+        self.result_window.show()
+        self.timer_for_label.reset()
 
     def start_timer(self):
         if self.label_task_text.toPlainText() == "":
             print("Выберите задание")
             return
-        self.timer.start()
+        self.timer_for_label.start()
         self.start_time = datetime.now()
         self.label_morse_code.setText("")
         self.label_translate_text.setText('')
         self.last_time_button_pressed = 0
 
     def stop_timer(self):
-        self.timer.stop()
+        self.timer_for_label.stop()

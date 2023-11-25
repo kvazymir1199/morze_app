@@ -1,5 +1,4 @@
 import os
-import random
 
 from PySide2.QtWidgets import (QWidget,
                                QLineEdit,
