@@ -13,28 +13,26 @@ def return_mistakes_count_1(data: dict):
         if item1 != item2:
             mistakes += item2 + " "
             count += 1
-    print(mistakes)
     return count
 
 
 def return_mistakes_count(data: dict):
     count = 0
-    item_1: str = data.get("initial_text")
     item_2: str = data.get("verifiable_text")
-    if item_2 == "":
+    if item_2 == "" or data.get('time')[0] * 60 + data.get('time')[1] == 0:
         return 0
-    task_list_groups = item_1.split(" ")
-    input_list_groups = item_2.split("   ")
-    for task_lst, input_lst in zip(task_list_groups, input_list_groups):
-        difference = len(task_lst) - len(input_lst)
+
+    first_array: str = data.get("initial_text").split("   ")
+    second_array: str = data.get("verifiable_text").split("   ")
+
+    for item1, item2 in zip(first_array, second_array):
+        for base_letter, input_letter in zip(item2, item1):
+            if base_letter != input_letter:
+                count += 1
+
+        difference = abs(len(item1) - len(item2))
         if difference != 0:
             count += abs(difference)
-        for task_symbol, input_symbol in zip(task_lst, input_lst):
-            print(f"task symbol: {task_symbol} | input symbol: {input_symbol}")
-            if task_symbol != input_symbol:
-                count += 1
-                print(
-                    f"input symbol: {input_symbol} wrong in {input_lst}. correct {task_symbol} in {task_lst}")
 
     return count
 
@@ -43,7 +41,7 @@ def return_speed_printing(data: dict):
     """ Функция расчета времени печати по формуле
     длинна передаваемой строки / время с начала запуска """
     length = len(data.get('verifiable_text'))
-    time_in_seconds = (data.get('time')[0] * 60 + data.get('time')[1]) / 100
+    time_in_seconds = (data.get('time')[0] * 60 + data.get('time')[1]) / 60
     try:
         return round(length / time_in_seconds, 2)
     except ZeroDivisionError:
@@ -56,7 +54,7 @@ class ResultWindow(QWidget):
     def __init__(self, data: dict):
         super().__init__()
         self.setWindowTitle("Ваш результат")
-        self.setFixedSize(350, 170)
+        self.setFixedSize(370, 170)
         # ----------------------------------------------------------------
         # Графическая метка отображения скорости печати
         self.label_show_speed = create_label(
@@ -93,10 +91,10 @@ class ResultWindow(QWidget):
             x=10,
             y=100
         )
-        minutes, seconds = divmod(data["time"][1], 60)
+        minutes, seconds = divmod(data["time"][0] * 60 + data["time"][1], 60)
         self.label_show_time = create_label(
             self,
-            text=f"{minutes:02d}:{seconds:02d}",
+            text=f"{int(minutes):02d}:{int(seconds):02d}",
             x=200,
             y=100
         )
@@ -104,13 +102,35 @@ class ResultWindow(QWidget):
     def show_mistakes(self, data: dict):
         """ Функция проверки ошибок. Для сравнения берутся строка из файла
         задания и строка переведенная с кода морзе"""
+        if data.get('time')[0] * 60 + data.get('time')[1] == 0:
+            return ""
         new_string = ""
-        for item1, item2 in zip(data.get("initial_text"),
-                                data.get("verifiable_text")):
-            if item1 != item2:
-                new_string += "<span style='color: red; text-decoration: underline;'>{}</span>".format(
-                    item2
-                )
-            else:
-                new_string += item2
+        first_array: str = data.get("initial_text").split("   ")
+        second_array: str = data.get("verifiable_text").split("   ")
+        for item1, item2 in zip(first_array, second_array):
+            for base_letter, input_letter in zip(item2, item1):
+                if base_letter != input_letter:
+                    new_string += "<span style='color: red; text-decoration: underline;'>{}</span>".format(
+                        base_letter)
+                else:
+                    new_string += base_letter
+            difference = abs(len(item1) - len(item2))
+            if len(item1) < len(item2):
+                new_string += ''.join(map(lambda
+                                              x: "<span style='color: red; text-decoration: underline;'>{}</span>".format(
+                    x), item1[-difference:]))
+            new_string += "   "
+
+        print(f"Исходный массив: {first_array}")
+        print(f"Проверочный массив: {second_array}")
+
+        # for item1, item2 in zip(data.get("initial_text"),
+        #                         data.get("verifiable_text")):
+        #     print(item1, item2)
+        #     if item1 != item2:
+        #         new_string += "<span style='color: red; text-decoration: underline;'>{}</span>".format(
+        #             item2
+        #         )
+        #     else:
+        #         new_string += item2
         return new_string
