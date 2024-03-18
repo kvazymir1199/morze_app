@@ -5,3 +5,6 @@ test_variant_2
 build/
 dist/
 .idea/
+venv/
+test.txt
+test1
