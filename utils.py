@@ -46,6 +46,7 @@ def create_button_by_cls(parent, cls, name, func):
     if func is not None:
         button.clicked.connect(func)
     button.setStyleSheet("QPushButton {border: 1px solid; border-radius: 3px;}")
+    button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     return button
 
 
@@ -110,16 +111,36 @@ class CustomPushButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super(CustomPushButton, self).__init__(*args, **kwargs)
         self.timer = QElapsedTimer()
+        self.parent = None
+
+    def save_parent(self, parent):
+        self.parent = parent
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.timer.start()
+            if self.parent.last_time_button_pressed != 0:
+                if time.time() - self.parent.last_time_button_pressed > 1.05:
+                    if self.parent.text_filed_morse.toPlainText()[-1] != "   ":
+                        self.parent.text_filed_morse.setText(
+                            self.parent.text_filed_morse.toPlainText() + "  ")
+                elif time.time() - self.parent.last_time_button_pressed > 0.45:
+                    if len(self.parent.text_filed_morse.toPlainText()[-1]) > 0 and \
+                            self.parent.text_filed_morse.toPlainText()[-1] != " ":
+                        self.parent.text_filed_morse.setText(
+                            self.parent.text_filed_morse.toPlainText() + " ")
+        self.parent.key_press_time = time.time()
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            duration = self.timer.elapsed()
-            print(f"Duration of left mouse button press: {duration} ms")
+            self.parent.last_time_button_pressed = time.time()
+            total_push_time = self.parent.last_time_button_pressed - self.parent.key_press_time
+            if 0.15 < total_push_time <= 0.45:
+                self.parent.text_filed_morse.setText(
+                    self.parent.text_filed_morse.toPlainText() + "-")
+            elif total_push_time <= 0.15:
+                self.parent.text_filed_morse.setText(
+                    self.parent.text_filed_morse.toPlainText() + ".")
         super().mouseReleaseEvent(event)
 
 

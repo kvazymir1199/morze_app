@@ -27,8 +27,8 @@ class GeneratePageWindow(QWidget):
         self.label_group_amount = create_label(
             self,
             text="Количество групп",
-            x=10,
-            y=10,
+            # x=10,
+            # y=10,
             font_size=10
         )
 

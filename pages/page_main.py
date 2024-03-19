@@ -73,7 +73,8 @@ class MainWindow(QWidget):
             func=self.start_timer,
         )
 
-        self.button_key = create_button(self, name="Ключ", func=None)
+        self.button_key = create_button_by_cls(self, cls=CustomPushButton, name="Ключ", func=None)
+        self.button_key.save_parent(self)
         self.button_key.setFont(QFont('Times', 15))
         self.button_key.setStyleSheet("QPushButton {background-color: blue; color: white; border: 1px solid; border-radius: 2px; }")
 
