@@ -1,7 +1,8 @@
 import random
 import time
 from PySide2.QtGui import QFont
-from PySide2.QtWidgets import QTextEdit, QPushButton, QLabel
+from PySide2.QtWidgets import QTextEdit, QPushButton, QLabel, QSizePolicy
+from PySide2.QtCore import QElapsedTimer, Qt
 
 MORSE_CODE_DICT = {'а': '.-', 'б': '-...', 'в': '.--', 'г': '--.', 'д': '-..',
                    'е': '.', 'ж': '...-', 'з': '--..',
@@ -20,32 +21,41 @@ DIGITS = list(map(str, range(10)))
 STRING_LENGTH = 5
 
 
-def create_textfield(self, x=0, y=0, length=0, width=0, func=None):
+def create_textfield(parent, func=None):
     """Функция для создания текстового поля"""
-    label = QTextEdit(self)
+    label = QTextEdit(parent=parent)
     label.setReadOnly(True)
-    label.move(x, y)
-    label.setFixedSize(length, width)
-    label.setStyleSheet("QTextEdit {border: 3px solid #1966FF; }")
+    label.setStyleSheet("QTextEdit {border: 3px solid #1966FF; ; border-radius: 3px;}")
     label.textChanged.connect(func)
     return label
 
 
-def create_button(self, name, func, x, y, length=100, width=30):
+def create_button(parent, name, func):
     """Функция для создания кнопки"""
-    self.button = QPushButton(name, self)
-    self.button.clicked.connect(func)
-    self.button.move(x, y)
-    self.button.resize(length, width)
-    return self.button
+    button = QPushButton(name, parent=parent)
+    if func is not None:
+        button.clicked.connect(func)
+    button.setStyleSheet("QPushButton {border: 1px solid; border-radius: 2px;}")
+    button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    return button
 
 
-def create_label(self, text, x, y, font_size=20):
+def create_button_by_cls(parent, cls, name, func):
+    """Функция для создания кнопки любого типа"""
+    button = cls(name, parent=parent)
+    if func is not None:
+        button.clicked.connect(func)
+    button.setStyleSheet("QPushButton {border: 1px solid; border-radius: 3px;}")
+    return button
+
+
+def create_label(self, text, font_size=20, center: bool = False):
     """Функция для создания текстовой метки"""
     label = QLabel(self)
-    label.move(x, y)
     label.setFont(QFont('Arial', font_size))
     label.setText(text)
+    if center:
+        label.setAlignment(Qt.AlignCenter)
     return label
 
 
@@ -94,6 +104,23 @@ def generate_random_string(self, words_amount, text_type):
 
     self.text_field.setText(text)
     return text
+
+
+class CustomPushButton(QPushButton):
+    def __init__(self, *args, **kwargs):
+        super(CustomPushButton, self).__init__(*args, **kwargs)
+        self.timer = QElapsedTimer()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.timer.start()
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            duration = self.timer.elapsed()
+            print(f"Duration of left mouse button press: {duration} ms")
+        super().mouseReleaseEvent(event)
 
 
 class Timer:
