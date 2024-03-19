@@ -3,7 +3,7 @@ import os
 from PySide2.QtWidgets import (QWidget,
                                QLineEdit,
                                QFileDialog,
-                               QComboBox)
+                               QComboBox, QGridLayout, QSizePolicy)
 
 from utils import (create_label,
                    create_textfield,
@@ -22,58 +22,76 @@ class GeneratePageWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Генерация файла")
-        self.setFixedSize(400, 290)
 
         self.label_group_amount = create_label(
             self,
             text="Количество групп",
-            # x=10,
-            # y=10,
             font_size=10
         )
+        self.label_group_amount.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.text_field_group = QLineEdit(self)
-        self.text_field_group.move(130, 10)
-        self.text_field_group.setFixedSize(40, 20)
+        self.text_field_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.label_text_format = create_label(
             self,
             text="Формат текста",
-            x=180,
-            y=10,
             font_size=10
         )
+        self.label_text_format.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.combo_box = QComboBox(self)
         self.combo_box.addItem("цифровой")
         self.combo_box.addItem("буквенный")
-        self.combo_box.move(270, 10)
+        self.combo_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.text_field = create_textfield(
             self,
-            x=10,
-            y=50,
-            length=380,
-            width=200,
         )
         self.save_button = create_button(
             self,
             name="Сохранить",
-            x=250,
-            y=255,
             func=self.save_text_to_file
         )
         self.generate_button = create_button(
             self,
             name="Сгенерировать",
-            x=70,
-            y=255,
             func=lambda: generate_random_string(
                 self,
                 self.text_field_group.text(),
                 self.combo_box.currentText()
             )
         )
+
+        # создадим лэйаут
+        self.grid = QGridLayout()
+
+        self.grid.addWidget(self.label_group_amount, 0, 0)
+        self.grid.addWidget(self.text_field_group, 0, 1)
+        self.grid.addWidget(self.label_text_format, 0, 2)
+        self.grid.addWidget(self.combo_box, 0, 3)
+
+        self.grid.addWidget(self.text_field, 1, 0, 1, 4)
+
+        self.grid.addWidget(self.generate_button, 2, 0, 1, 2)
+        self.grid.addWidget(self.save_button, 2, 2, 1, 2)
+
+        # self.grid.setRowStretch(0, 1)
+        self.grid.setRowStretch(1, 3)
+        self.grid.setRowStretch(2, 1)
+
+        self.grid.setColumnMinimumWidth(0, 50)
+        self.grid.setColumnMinimumWidth(1, 50)
+        self.grid.setColumnMinimumWidth(2, 50)
+        self.grid.setColumnMinimumWidth(3, 50)
+
+        self.grid.setColumnStretch(0, 1)
+        self.grid.setColumnStretch(1, 1)
+        self.grid.setColumnStretch(2, 1)
+        self.grid.setColumnStretch(3, 1)
+
+
+        self.setLayout(self.grid)
 
     def save_text_to_file(self):
         text = self.text_field.toPlainText()
