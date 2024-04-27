@@ -8,3 +8,4 @@ dist/
 venv/
 test.txt
 test1
+**/__pycache__/
