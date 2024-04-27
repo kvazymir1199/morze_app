@@ -9,3 +9,4 @@ venv/
 test.txt
 test1
 **/__pycache__/
+*.spec
