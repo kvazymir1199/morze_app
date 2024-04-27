@@ -1,11 +1,13 @@
 import time
 from datetime import datetime
 
-from PySide2.QtCore import QTimer
+from PySide2.QtCore import QTimer, QUrl
 from PySide2.QtGui import Qt, QFont
+from PySide2.QtMultimedia import QSoundEffect
 from PySide2.QtWidgets import QWidget, QFileDialog, QGridLayout
 from pages.page_generate_file import GeneratePageWindow
 from pages.page_show_result import ResultWindow
+from sounds import resources_rc
 from utils import (morse_to_text,
                    create_textfield,
                    create_button,
@@ -15,7 +17,7 @@ from utils import (morse_to_text,
 
 
 class MainWindow(QWidget):
-    def __init__(self):
+    def __init__(self, current_dir):
         """ Класс для создания и отображения основного окна программы"""
         super().__init__()
         self.setWindowTitle("Основное меню")  # присваивает окну название
@@ -34,6 +36,12 @@ class MainWindow(QWidget):
             self.update_time
         )  # тут связываем с функцией для обновления раз в секунду
         self.timer.start(1000)  # тут задаем ему скорость
+
+        self.effect = QSoundEffect()
+        self.effect.setSource(QUrl("qrc:/blip3.wav"))
+        self.effect.setLoopCount(QSoundEffect.Infinite)
+        self.effect.setVolume(0.25)
+
         self.timer_label = create_label(
             self,
             text="00:00",
@@ -76,7 +84,8 @@ class MainWindow(QWidget):
         self.button_key = create_button_by_cls(self, cls=CustomPushButton, name="Ключ", func=None)
         self.button_key.save_parent(self)
         self.button_key.setFont(QFont('Times', 15))
-        self.button_key.setStyleSheet("QPushButton {background-color: blue; color: white; border: 1px solid; border-radius: 2px; }")
+        self.button_key.setStyleSheet(
+            "QPushButton {background-color: blue; color: white; border: 1px solid; border-radius: 2px; }")
 
         self.text_filed_task = create_textfield(self)
 
@@ -120,6 +129,12 @@ class MainWindow(QWidget):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_W:
+            # play sound
+            # self.sound.play()
+            # self.mediaPlayer.play()
+            self.effect.play()
+
+            # calc
             if self.last_time_button_pressed != 0:
                 if time.time() - self.last_time_button_pressed > 1.05:
                     if self.text_filed_morse.toPlainText()[-1] != "   ":
@@ -130,10 +145,17 @@ class MainWindow(QWidget):
                             self.text_filed_morse.toPlainText()[-1] != " ":
                         self.text_filed_morse.setText(
                             self.text_filed_morse.toPlainText() + " ")
+
         self.key_press_time = time.time()
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_W and not event.isAutoRepeat():
+            # stop playing sound
+            # self.sound.stop()
+            # self.mediaPlayer.stop()
+            self.effect.stop()
+
+            # calc
             self.last_time_button_pressed = time.time()
             total_push_time = self.last_time_button_pressed - self.key_press_time
             if 0.15 < total_push_time <= 0.45:

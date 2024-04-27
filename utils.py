@@ -1,6 +1,9 @@
 import random
 import time
+from typing import Optional
+
 from PySide2.QtGui import QFont
+from PySide2.QtMultimedia import QSoundEffect
 from PySide2.QtWidgets import QTextEdit, QPushButton, QLabel, QSizePolicy
 from PySide2.QtCore import QElapsedTimer, Qt
 
@@ -40,9 +43,9 @@ def create_button(parent, name, func):
     return button
 
 
-def create_button_by_cls(parent, cls, name, func):
+def create_button_by_cls(parent, cls, name, func, *args, **kwargs):
     """Функция для создания кнопки любого типа"""
-    button = cls(name, parent=parent)
+    button = cls(name, parent=parent, *args, **kwargs)
     if func is not None:
         button.clicked.connect(func)
     button.setStyleSheet("QPushButton {border: 1px solid; border-radius: 3px;}")
@@ -112,12 +115,22 @@ class CustomPushButton(QPushButton):
         super(CustomPushButton, self).__init__(*args, **kwargs)
         self.timer = QElapsedTimer()
         self.parent = None
+        # Extract 'parent' from kwargs if it's present
+        parent_obj = kwargs.get('parent', None)
+
+        # If 'parent' is present in kwargs, and it has an 'effect' attribute, use it
+        if 'parent' in kwargs and hasattr(parent_obj, 'effect'):
+            self.effect: Optional[QSoundEffect] = parent_obj.effect
+
+            print(f'self.effect: {self.effect}')
 
     def save_parent(self, parent):
         self.parent = parent
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            if self.effect:
+                self.effect.play()
             if self.parent.last_time_button_pressed != 0:
                 if time.time() - self.parent.last_time_button_pressed > 1.05:
                     if self.parent.text_filed_morse.toPlainText()[-1] != "   ":
@@ -133,6 +146,9 @@ class CustomPushButton(QPushButton):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
+            if self.effect:
+                self.effect.stop()
+
             self.parent.last_time_button_pressed = time.time()
             total_push_time = self.parent.last_time_button_pressed - self.parent.key_press_time
             if 0.15 < total_push_time <= 0.45:
