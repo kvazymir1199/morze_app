@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QWidget, QGridLayout
 from utils import create_label
 
 
@@ -60,44 +60,55 @@ class ResultWindow(QWidget):
         self.label_show_speed = create_label(
             self,
             text="Скорость - ",
-            x=10,
-            y=10
+            # x=10,
+            # y=10
         )
         self.label_digits_in_minute = create_label(
             self,
             text=f"{return_speed_printing(data)} зн/мин",
-            x=200,
-            y=10
+            # x=200,
+            # y=10
         )
         #  ----------------------------------------------------------------
         # Графическая метка отображения полученных ошибок
         self.label_mistakes_count = create_label(
             self,
             text="Кол. ошибок - ",
-            x=10,
-            y=50
+            # x=10,
+            # y=50
         )
-        self.label_mistakes_count = create_label(
+        self.label_mistakes_count_ = create_label(
             self,
             text=f"{return_mistakes_count(data)}",
-            x=200,
-            y=50
+            # x=200,
+            # y=50
         )
         # ----------------------------------------------------------------
         # Графическая метка отображения времени
         self.label_current_time = create_label(
             self,
             text="Время - ",
-            x=10,
-            y=100
+            # x=10,
+            # y=100
         )
         minutes, seconds = divmod(data["time"][0] * 60 + data["time"][1], 60)
         self.label_show_time = create_label(
             self,
             text=f"{int(minutes):02d}:{int(seconds):02d}",
-            x=200,
-            y=100
+            # x=200,
+            # y=100
         )
+
+        self.grid = QGridLayout()
+
+        self.grid.addWidget(self.label_show_speed, 0, 0)
+        self.grid.addWidget(self.label_digits_in_minute, 0, 1)
+        self.grid.addWidget(self.label_mistakes_count, 1, 0)
+        self.grid.addWidget(self.label_mistakes_count_, 1, 1)
+        self.grid.addWidget(self.label_current_time, 2, 0)
+        self.grid.addWidget(self.label_show_time, 2, 1)
+
+        self.setLayout(self.grid)
 
     def show_mistakes(self, data: dict):
         """ Функция проверки ошибок. Для сравнения берутся строка из файла
