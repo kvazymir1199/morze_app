@@ -34,7 +34,7 @@ def create_textfield(parent, func=None):
     return label
 
 
-def create_button(parent, name, func):
+def create_button(parent, name, func, **kwargs):
     """Функция для создания кнопки"""
     button = QPushButton(name, parent=parent)
     if func is not None:

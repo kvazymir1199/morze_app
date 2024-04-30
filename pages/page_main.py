@@ -87,10 +87,13 @@ class MainWindow(QWidget):
         self.button_key.setStyleSheet(
             "QPushButton {background-color: blue; color: white; border: 1px solid; border-radius: 2px; }")
 
+        # первое текстовое поле
         self.text_filed_task = create_textfield(self)
 
+        # второе текстовое поле
         self.text_filed_translate = create_textfield(self)
 
+        # третье текстовое поле
         self.text_filed_morse = create_textfield(self, func=self.on_text_changed)
 
         # add all objects to grid LAYOUT
