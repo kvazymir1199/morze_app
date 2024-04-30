@@ -37,10 +37,10 @@ class MainWindow(QWidget):
         )  # тут связываем с функцией для обновления раз в секунду
         self.timer.start(1000)  # тут задаем ему скорость
 
-        self.effect = QSoundEffect()
-        self.effect.setSource(QUrl("qrc:/blip3.wav"))
-        self.effect.setLoopCount(QSoundEffect.Infinite)
-        self.effect.setVolume(0.25)
+        # self.effect = QSoundEffect()
+        # self.effect.setSource(QUrl("qrc:/blip3.wav"))
+        # self.effect.setLoopCount(QSoundEffect.Infinite)
+        # self.effect.setVolume(0.25)
 
         self.timer_label = create_label(
             self,
@@ -132,7 +132,7 @@ class MainWindow(QWidget):
             # play sound
             # self.sound.play()
             # self.mediaPlayer.play()
-            self.effect.play()
+            # self.effect.play()
 
             # calc
             if self.last_time_button_pressed != 0:
@@ -153,7 +153,7 @@ class MainWindow(QWidget):
             # stop playing sound
             # self.sound.stop()
             # self.mediaPlayer.stop()
-            self.effect.stop()
+            # self.effect.stop()
 
             # calc
             self.last_time_button_pressed = time.time()

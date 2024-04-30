@@ -39,6 +39,7 @@ def create_button(parent, name, func):
     button = QPushButton(name, parent=parent)
     if func is not None:
         button.clicked.connect(func)
+
     button.setStyleSheet("QPushButton {border: 1px solid; border-radius: 2px;}")
     button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     return button
@@ -120,18 +121,18 @@ class CustomPushButton(QPushButton):
         parent_obj = kwargs.get('parent', None)
 
         # If 'parent' is present in kwargs, and it has an 'effect' attribute, use it
-        if 'parent' in kwargs and hasattr(parent_obj, 'effect'):
-            self.effect: Optional[QSoundEffect] = parent_obj.effect
-
-            print(f'self.effect: {self.effect}')
+        # if 'parent' in kwargs and hasattr(parent_obj, 'effect'):
+        #     self.effect: Optional[QSoundEffect] = parent_obj.effect
+        #
+        #     print(f'self.effect: {self.effect}')
 
     def save_parent(self, parent):
         self.parent = parent
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self.effect:
-                self.effect.play()
+            # if self.effect:
+            #     self.effect.play()
             if self.parent.last_time_button_pressed != 0:
                 if time.time() - self.parent.last_time_button_pressed > 1.05:
                     if self.parent.text_filed_morse.toPlainText()[-1] != "   ":
@@ -147,8 +148,8 @@ class CustomPushButton(QPushButton):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self.effect:
-                self.effect.stop()
+            # if self.effect:
+            #     self.effect.stop()
 
             self.parent.last_time_button_pressed = time.time()
             total_push_time = self.parent.last_time_button_pressed - self.parent.key_press_time

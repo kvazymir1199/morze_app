@@ -90,15 +90,16 @@ class GeneratePageWindow(QWidget):
         self.grid.setColumnStretch(2, 1)
         self.grid.setColumnStretch(3, 1)
 
-
         self.setLayout(self.grid)
 
     def save_text_to_file(self):
         text = self.text_field.toPlainText()
+        # Get the directory of the current script
+        current_script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         filename = QFileDialog.getSaveFileName(
             self,
             "Save file",
-            os.path.expanduser("~/Desktop")
+            current_script_dir
         )
         if filename[0]:
             with open(filename[0], 'w') as f:
