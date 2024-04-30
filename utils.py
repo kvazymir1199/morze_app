@@ -19,7 +19,8 @@ MORSE_CODE_DICT = {'а': '.-', 'б': '-...', 'в': '.--', 'г': '--.', 'д': '-.
                    '4': '....-', '5': '.....', '6': '-....', '7': '--...',
                    '8': '---..', '9': '----.', '   ': '',
                    }
-RUSSIAN_LETTERS = [chr(i) for i in range(1072, 1104)]
+EXCLUDED_RUSSIAN_LETTERS = ['т', 'ъ']
+RUSSIAN_LETTERS = [chr(i) for i in range(1072, 1104) if chr(i) not in EXCLUDED_RUSSIAN_LETTERS]
 DIGITS = list(map(str, range(10)))
 STRING_LENGTH = 5
 
