@@ -81,11 +81,11 @@ class MainWindow(QWidget):
             name="Стоп",
             func=self.stop_timer,
         )
-        self.button_start = create_button(
-            self,
-            name="Старт",
-            func=self.start_timer,
-        )
+        # self.button_start = create_button(
+        #     self,
+        #     name="Старт",
+        #     func=self.start_timer,
+        # )
 
         self.button_key = create_button_by_cls(self, cls=CustomPushButton, name="Ключ", func=None)
         self.button_key.save_parent(self)
@@ -111,7 +111,7 @@ class MainWindow(QWidget):
         self.grid.addWidget(self.button_create_file, 1, 1)  # добавляем кнопку в 3 и 4 столбец вторая строка
         self.grid.addWidget(self.button_make_check, 1, 2)  # добавляем кнопку в 5, 6 и 7 столбец вторая строка
         self.grid.addWidget(self.button_stop, 1, 3)  # добавляем кнопку в 8 и 9 столбец вторая строка
-        self.grid.addWidget(self.button_start, 1, 4)  # добавляем кнопку в 10, 11 столбец вторая строка
+        # self.grid.addWidget(self.button_start, 1, 4)  # добавляем кнопку в 10, 11 столбец вторая строка
 
         self.grid.addWidget(self.button_key, 2, 0, 1, 5)
 
