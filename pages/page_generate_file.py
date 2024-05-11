@@ -63,11 +63,11 @@ class GeneratePageWindow(QWidget):
             )
         )
 
-        self.use_it_button = create_button(
-            self,
-            name="Использовать",
-            func=None
-        )
+        # self.use_it_button = create_button(
+        #     self,
+        #     name="Использовать",
+        #     func=None
+        # )
 
         # создадим лэйаут
         self.grid = QGridLayout()
@@ -80,8 +80,8 @@ class GeneratePageWindow(QWidget):
         self.grid.addWidget(self.text_field, 1, 0, 1, 4)
 
         self.grid.addWidget(self.generate_button, 2, 0, 1, 2)
-        self.grid.addWidget(self.save_button, 2, 2, 1, 1)  # Adjusted column span to 1
-        self.grid.addWidget(self.use_it_button, 2, 3, 1, 1)  # Added the new button
+        self.grid.addWidget(self.save_button, 2, 2, 1, 2)
+        # self.grid.addWidget(self.use_it_button, 2, 3, 1, 1)
 
         # self.grid.setRowStretch(0, 1)
         self.grid.setRowStretch(1, 3)

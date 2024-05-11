@@ -110,7 +110,8 @@ class ResultWindow(QWidget):
 
         self.setLayout(self.grid)
 
-    def show_mistakes(self, data: dict):
+    @staticmethod
+    def show_mistakes(data: dict, stoppers: dict[str, str]):
         """ Функция проверки ошибок. Для сравнения берутся строка из файла
         задания и строка переведенная с кода морзе"""
         if data.get('time')[0] * 60 + data.get('time')[1] == 0:
@@ -127,21 +128,11 @@ class ResultWindow(QWidget):
                     new_string += base_letter
             difference = abs(len(item1) - len(item2))
             if len(item1) < len(item2):
-                new_string += ''.join(map(lambda
-                                              x: "<span style='color: red; text-decoration: underline;'>{}</span>".format(
-                    x), item1[-difference:]))
+                string = "<span style='color: red; text-decoration: underline;'>{}</span>"
+                new_string += ''.join(map(lambda x: string.format(x), item1[-difference:]))
             new_string += "   "
 
         print(f"Исходный массив: {first_array}")
         print(f"Проверочный массив: {second_array}")
 
-        # for item1, item2 in zip(data.get("initial_text"),
-        #                         data.get("verifiable_text")):
-        #     print(item1, item2)
-        #     if item1 != item2:
-        #         new_string += "<span style='color: red; text-decoration: underline;'>{}</span>".format(
-        #             item2
-        #         )
-        #     else:
-        #         new_string += item2
         return new_string

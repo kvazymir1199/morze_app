@@ -3,7 +3,6 @@ import time
 from typing import Optional
 
 from PySide2.QtGui import QFont
-from PySide2.QtMultimedia import QSoundEffect
 from PySide2.QtWidgets import QTextEdit, QPushButton, QLabel, QSizePolicy
 from PySide2.QtCore import QElapsedTimer, Qt
 

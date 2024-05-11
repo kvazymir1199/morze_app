@@ -1,19 +1,30 @@
 import time
 from datetime import datetime
+import logging
 
 from PySide2.QtCore import QTimer, QUrl
 from PySide2.QtGui import Qt, QFont
-from PySide2.QtMultimedia import QSoundEffect
 from PySide2.QtWidgets import QWidget, QFileDialog, QGridLayout
 from pages.page_generate_file import GeneratePageWindow
 from pages.page_show_result import ResultWindow
-from sounds import resources_rc
 from utils import (morse_to_text,
                    create_textfield,
                    create_button,
                    create_button_by_cls,
                    create_label,
                    Timer, CustomPushButton)
+
+# stoppers list
+STOPPERS: dict[str, str] = {
+    "......": "6 dots",
+    ".......": "7 dots",
+    "........": "8 dots"
+}
+# Set the root logger level to DEBUG
+logging_level = logging.INFO
+logging.basicConfig(level=logging_level)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging_level)
 
 
 class MainWindow(QWidget):
@@ -36,11 +47,6 @@ class MainWindow(QWidget):
             self.update_time
         )  # тут связываем с функцией для обновления раз в секунду
         self.timer.start(1000)  # тут задаем ему скорость
-
-        # self.effect = QSoundEffect()
-        # self.effect.setSource(QUrl("qrc:/blip3.wav"))
-        # self.effect.setLoopCount(QSoundEffect.Infinite)
-        # self.effect.setVolume(0.25)
 
         self.timer_label = create_label(
             self,
@@ -131,32 +137,54 @@ class MainWindow(QWidget):
         self.timer_label.setText(f"{int(minutes):02d}:{int(seconds):02d}")
 
     def keyPressEvent(self, event):
+        if not self.timer_for_label.is_running:
+            self.start_timer()
+
         if event.key() == Qt.Key_W:
-            # play sound
-            # self.sound.play()
-            # self.mediaPlayer.play()
-            # self.effect.play()
 
             # calc
             if self.last_time_button_pressed != 0:
                 if time.time() - self.last_time_button_pressed > 1.05:
-                    if self.text_filed_morse.toPlainText()[-1] != "   ":
-                        self.text_filed_morse.setText(
-                            self.text_filed_morse.toPlainText() + "  ")
+                    # вот место, где отделяются слова,
+                    # а потом уже добавлять пробел
+                    if self.text_filed_morse.toPlainText()[-1] != " ":
+                        self.edit_morse_field("  ")
+                    logger.debug("большой пробел")
+
                 elif time.time() - self.last_time_button_pressed > 0.45:
                     if len(self.text_filed_morse.toPlainText()[-1]) > 0 and \
                             self.text_filed_morse.toPlainText()[-1] != " ":
-                        self.text_filed_morse.setText(
-                            self.text_filed_morse.toPlainText() + " ")
-
+                        # тут и будем смотреть на предыдущие символы
+                        self.edit_morse_field(" ")
+                    logger.debug("маленький пробел")
         self.key_press_time = time.time()
+
+    def edit_morse_field(self, whitespace: str):
+        morse_last_line = self.text_filed_morse.toPlainText().split("  ")[-1]
+        morse_last_group = morse_last_line.split(" ")[-1]
+        if morse_last_group in STOPPERS:
+            logger.debug("morse last group in stoppers")
+            morse_groups = morse_last_line.split(" ")
+            if len(morse_groups) > 1:
+                length = len(morse_groups[-1]) + len(morse_groups[-2]) + 1
+            else:
+                length = len(morse_groups[-1])
+            self.text_filed_morse.setText(
+                self.text_filed_morse.toPlainText()[:-length]
+            )
+            logger.debug(f"{morse_groups[-1]=} | {morse_groups[-2]} | {length=}")
+        elif "......" in morse_last_group[-6:]:
+            logger.debug(f"6 dots in {morse_last_group[-6:]=}")
+            length = len(morse_last_line.split(" ")[-1])
+            self.text_filed_morse.setText(
+                self.text_filed_morse.toPlainText()[:-length])
+        else:
+            logger.debug("just new symbol or word")
+            self.text_filed_morse.setText(
+                self.text_filed_morse.toPlainText()[:] + whitespace)
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_W and not event.isAutoRepeat():
-            # stop playing sound
-            # self.sound.stop()
-            # self.mediaPlayer.stop()
-            # self.effect.stop()
 
             # calc
             self.last_time_button_pressed = time.time()
@@ -197,7 +225,7 @@ class MainWindow(QWidget):
         }
         self.result_window = ResultWindow(data=data)
         self.text_filed_translate.setText(
-            self.result_window.show_mistakes(data=data)
+            self.result_window.show_mistakes(data=data, stoppers=STOPPERS)
         )
         self.result_window.show()
         self.timer_for_label.reset()
