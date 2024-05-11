@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget, QGridLayout
+from PySide2.QtWidgets import QWidget, QGridLayout, QSizePolicy
 from utils import create_label
 
 
@@ -54,7 +54,7 @@ class ResultWindow(QWidget):
     def __init__(self, data: dict):
         super().__init__()
         self.setWindowTitle("Ваш результат")
-        self.setFixedSize(370, 170)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # ----------------------------------------------------------------
         # Графическая метка отображения скорости печати
         self.label_show_speed = create_label(
