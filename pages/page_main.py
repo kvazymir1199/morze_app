@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 
 from PySide2.QtCore import QTimer, QUrl
-from PySide2.QtGui import Qt, QFont
+from PySide2.QtGui import Qt, QFont, QKeyEvent
 from PySide2.QtWidgets import QWidget, QFileDialog, QGridLayout
 from pages.page_generate_file import GeneratePageWindow
 from pages.page_show_result import ResultWindow
@@ -28,7 +28,7 @@ logger.setLevel(logging_level)
 
 
 class MainWindow(QWidget):
-    def __init__(self, current_dir):
+    def __init__(self):
         """ Класс для создания и отображения основного окна программы"""
         super().__init__()
         self.setWindowTitle("Основное меню")  # присваивает окну название
@@ -136,7 +136,7 @@ class MainWindow(QWidget):
         minutes, seconds = divmod(self.timer_for_label.get_elapsed_time(), 60)
         self.timer_label.setText(f"{int(minutes):02d}:{int(seconds):02d}")
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QKeyEvent):
         if not self.timer_for_label.is_running:
             self.start_timer()
 
@@ -172,7 +172,7 @@ class MainWindow(QWidget):
             self.text_filed_morse.setText(
                 self.text_filed_morse.toPlainText()[:-length]
             )
-            logger.debug(f"{morse_groups[-1]=} | {morse_groups[-2]} | {length=}")
+            logger.debug(f"{morse_groups[-1]=} | {morse_groups[-2] + ' | ' if len(morse_groups) > 1 else ''} {length=}")
         elif "......" in morse_last_group[-6:]:
             logger.debug(f"6 dots in {morse_last_group[-6:]=}")
             length = len(morse_last_line.split(" ")[-1])
