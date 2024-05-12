@@ -129,15 +129,7 @@ class CustomPushButton(QPushButton):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-
-            self.parent.last_time_button_pressed = time.time()
-            total_push_time = self.parent.last_time_button_pressed - self.parent.key_press_time
-            if 0.15 < total_push_time <= 0.45:
-                self.parent.text_filed_morse.setText(
-                    self.parent.text_filed_morse.toPlainText() + "-")
-            elif total_push_time <= 0.15:
-                self.parent.text_filed_morse.setText(
-                    self.parent.text_filed_morse.toPlainText() + ".")
+            self.parent.handle_key_release_event()
         super().mouseReleaseEvent(event)
 
 

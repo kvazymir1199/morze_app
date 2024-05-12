@@ -139,14 +139,12 @@ class MainWindow(QWidget):
     def keyPressEvent(self, event: QKeyEvent):
 
         if event.key() == Qt.Key_W:
-            self.handle_key_press_event()
+            if not self.timer_for_label.is_running:
+                self.start_timer()
 
-        self.key_press_time = time.time()
+        # self.key_press_time = time.time()
 
     def handle_key_press_event(self):
-        if not self.timer_for_label.is_running:
-            self.start_timer()
-
         # calc
         if self.last_time_button_pressed != 0:
             if time.time() - self.last_time_button_pressed > 1.05:
@@ -154,14 +152,14 @@ class MainWindow(QWidget):
                 # а потом уже добавлять пробел
                 if self.text_filed_morse.toPlainText()[-1] != " ":
                     self.edit_morse_field("  ")
-                logger.debug("большой пробел")
+                # logger.debug("большой пробел")
 
             elif time.time() - self.last_time_button_pressed > 0.45:
                 if len(self.text_filed_morse.toPlainText()[-1]) > 0 and \
                         self.text_filed_morse.toPlainText()[-1] != " ":
                     # тут и будем смотреть на предыдущие символы
                     self.edit_morse_field(" ")
-                logger.debug("маленький пробел")
+                # logger.debug("маленький пробел")
 
     def edit_morse_field(self, whitespace: str):
         morse_last_line = self.text_filed_morse.toPlainText().split("  ")
@@ -195,17 +193,20 @@ class MainWindow(QWidget):
                 self.text_filed_morse.toPlainText()[:] + whitespace)
 
     def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key_W and not event.isAutoRepeat():
+        ...
+        # if event.key() == Qt.Key_W and not event.isAutoRepeat():
+        #     self.handle_key_release_event()
 
-            # calc
-            self.last_time_button_pressed = time.time()
-            total_push_time = self.last_time_button_pressed - self.key_press_time
-            if 0.15 < total_push_time <= 0.45:
-                self.text_filed_morse.setText(
-                    self.text_filed_morse.toPlainText() + "-")
-            elif total_push_time <= 0.15:
-                self.text_filed_morse.setText(
-                    self.text_filed_morse.toPlainText() + ".")
+    def handle_key_release_event(self):
+        # calc
+        self.last_time_button_pressed = time.time()
+        total_push_time = self.last_time_button_pressed - self.key_press_time
+        if 0.15 < total_push_time <= 0.45:
+            self.text_filed_morse.setText(
+                self.text_filed_morse.toPlainText() + "-")
+        elif total_push_time <= 0.15:
+            self.text_filed_morse.setText(
+                self.text_filed_morse.toPlainText() + ".")
 
     def on_text_changed(self):
         self.text_filed_translate.setText(
