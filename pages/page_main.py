@@ -21,7 +21,7 @@ STOPPERS: dict[str, str] = {
     "........": "8 dots"
 }
 # Set the root logger level to DEBUG
-logging_level = logging.INFO
+logging_level = logging.DEBUG
 logging.basicConfig(level=logging_level)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging_level)
@@ -164,7 +164,7 @@ class MainWindow(QWidget):
         morse_last_group = morse_last_line.split(" ")[-1]
         if morse_last_group in STOPPERS:
             logger.debug("morse last group in stoppers")
-            morse_groups = morse_last_line.split(" ")
+            morse_groups = morse_last_line.split("  ")
             if len(morse_groups) > 1:
                 length = len(morse_groups[-1]) + len(morse_groups[-2]) + 1
             else:
@@ -173,6 +173,7 @@ class MainWindow(QWidget):
                 self.text_filed_morse.toPlainText()[:-length]
             )
             logger.debug(f"{morse_groups[-1]=} | {morse_groups[-2] + ' | ' if len(morse_groups) > 1 else ''} {length=}")
+            logger.debug(f"{morse_groups=}")
         elif "......" in morse_last_group[-6:]:
             logger.debug(f"6 dots in {morse_last_group[-6:]=}")
             length = len(morse_last_line.split(" ")[-1])
