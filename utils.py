@@ -116,39 +116,19 @@ class CustomPushButton(QPushButton):
         super(CustomPushButton, self).__init__(*args, **kwargs)
         self.timer = QElapsedTimer()
         self.parent = None
-        # Extract 'parent' from kwargs if it's present
-        parent_obj = kwargs.get('parent', None)
-
-        # If 'parent' is present in kwargs, and it has an 'effect' attribute, use it
-        # if 'parent' in kwargs and hasattr(parent_obj, 'effect'):
-        #     self.effect: Optional[QSoundEffect] = parent_obj.effect
-        #
-        #     print(f'self.effect: {self.effect}')
 
     def save_parent(self, parent):
         self.parent = parent
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            # if self.effect:
-            #     self.effect.play()
-            if self.parent.last_time_button_pressed != 0:
-                if time.time() - self.parent.last_time_button_pressed > 1.05:
-                    if self.parent.text_filed_morse.toPlainText()[-1] != "   ":
-                        self.parent.text_filed_morse.setText(
-                            self.parent.text_filed_morse.toPlainText() + "  ")
-                elif time.time() - self.parent.last_time_button_pressed > 0.45:
-                    if len(self.parent.text_filed_morse.toPlainText()[-1]) > 0 and \
-                            self.parent.text_filed_morse.toPlainText()[-1] != " ":
-                        self.parent.text_filed_morse.setText(
-                            self.parent.text_filed_morse.toPlainText() + " ")
+            self.parent.handle_key_press_event()
+
         self.parent.key_press_time = time.time()
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            # if self.effect:
-            #     self.effect.stop()
 
             self.parent.last_time_button_pressed = time.time()
             total_push_time = self.parent.last_time_button_pressed - self.parent.key_press_time

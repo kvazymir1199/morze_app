@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 import logging
 
-from PySide2.QtCore import QTimer, QUrl
+from PySide2.QtCore import QTimer
 from PySide2.QtGui import Qt, QFont, QKeyEvent
 from PySide2.QtWidgets import QWidget, QFileDialog, QGridLayout
 from pages.page_generate_file import GeneratePageWindow
@@ -137,46 +137,56 @@ class MainWindow(QWidget):
         self.timer_label.setText(f"{int(minutes):02d}:{int(seconds):02d}")
 
     def keyPressEvent(self, event: QKeyEvent):
+
+        if event.key() == Qt.Key_W:
+            self.handle_key_press_event()
+
+        self.key_press_time = time.time()
+
+    def handle_key_press_event(self):
         if not self.timer_for_label.is_running:
             self.start_timer()
 
-        if event.key() == Qt.Key_W:
+        # calc
+        if self.last_time_button_pressed != 0:
+            if time.time() - self.last_time_button_pressed > 1.05:
+                # вот место, где отделяются слова,
+                # а потом уже добавлять пробел
+                if self.text_filed_morse.toPlainText()[-1] != " ":
+                    self.edit_morse_field("  ")
+                logger.debug("большой пробел")
 
-            # calc
-            if self.last_time_button_pressed != 0:
-                if time.time() - self.last_time_button_pressed > 1.05:
-                    # вот место, где отделяются слова,
-                    # а потом уже добавлять пробел
-                    if self.text_filed_morse.toPlainText()[-1] != " ":
-                        self.edit_morse_field("  ")
-                    logger.debug("большой пробел")
-
-                elif time.time() - self.last_time_button_pressed > 0.45:
-                    if len(self.text_filed_morse.toPlainText()[-1]) > 0 and \
-                            self.text_filed_morse.toPlainText()[-1] != " ":
-                        # тут и будем смотреть на предыдущие символы
-                        self.edit_morse_field(" ")
-                    logger.debug("маленький пробел")
-        self.key_press_time = time.time()
+            elif time.time() - self.last_time_button_pressed > 0.45:
+                if len(self.text_filed_morse.toPlainText()[-1]) > 0 and \
+                        self.text_filed_morse.toPlainText()[-1] != " ":
+                    # тут и будем смотреть на предыдущие символы
+                    self.edit_morse_field(" ")
+                logger.debug("маленький пробел")
 
     def edit_morse_field(self, whitespace: str):
-        morse_last_line = self.text_filed_morse.toPlainText().split("  ")[-1]
-        morse_last_group = morse_last_line.split(" ")[-1]
+        morse_last_line = self.text_filed_morse.toPlainText().split("  ")
+        morse_last_line = morse_last_line[-2 if len(morse_last_line) > 1 else -1:]
+        morse_last_group = morse_last_line[-1].split(" ")[-1]
         if morse_last_group in STOPPERS:
             logger.debug("morse last group in stoppers")
-            morse_groups = morse_last_line.split("  ")
-            if len(morse_groups) > 1:
-                length = len(morse_groups[-1]) + len(morse_groups[-2]) + 1
+            logger.debug(f"start: {morse_last_line=}")
+            morse_groups = morse_last_line[-1].split("  ")
+            if len(morse_last_line) > 1:
+                length = len(morse_last_line[-1]) + len(morse_last_line[-2]) + 1
             else:
-                length = len(morse_groups[-1])
+                length = len(morse_last_line[-1])
             self.text_filed_morse.setText(
                 self.text_filed_morse.toPlainText()[:-length]
             )
-            logger.debug(f"{morse_groups[-1]=} | {morse_groups[-2] + ' | ' if len(morse_groups) > 1 else ''} {length=}")
+            logger.debug(f"{morse_groups[-1]=} | {morse_groups[-2] + ' | ' if len(morse_groups) > 1 else ''}{length=}")
             logger.debug(f"{morse_groups=}")
         elif "......" in morse_last_group[-6:]:
+            logger.debug(f"start: {morse_last_line=}")
             logger.debug(f"6 dots in {morse_last_group[-6:]=}")
-            length = len(morse_last_line.split("  ")[-1])
+            if len(morse_last_line) > 1:
+                length = len(morse_last_line[-1]) + len(morse_last_line[-2]) + 1
+            else:
+                length = len(morse_last_line[-1])
             self.text_filed_morse.setText(
                 self.text_filed_morse.toPlainText()[:-length])
         else:
