@@ -176,7 +176,7 @@ class MainWindow(QWidget):
             logger.debug(f"{morse_groups=}")
         elif "......" in morse_last_group[-6:]:
             logger.debug(f"6 dots in {morse_last_group[-6:]=}")
-            length = len(morse_last_line.split(" ")[-1])
+            length = len(morse_last_line.split("  ")[-1])
             self.text_filed_morse.setText(
                 self.text_filed_morse.toPlainText()[:-length])
         else:
