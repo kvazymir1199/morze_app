@@ -40,7 +40,7 @@ def return_mistakes_count(data: dict):
 def return_speed_printing(data: dict):
     """ Функция расчета времени печати по формуле
     длинна передаваемой строки / время с начала запуска """
-    length = len(data.get('verifiable_text'))
+    length = len(data.get('verifiable_text').replace(' ', ''))
     time_in_seconds = (data.get('time')[0] * 60 + data.get('time')[1]) / 60
     try:
         return round(length / time_in_seconds, 2)

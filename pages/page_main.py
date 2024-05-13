@@ -168,27 +168,34 @@ class MainWindow(QWidget):
         if morse_last_group in STOPPERS:
             logger.debug("morse last group in stoppers")
             logger.debug(f"start: {morse_last_line=}")
-            morse_groups = morse_last_line[-1].split("  ")
-            if len(morse_last_line) > 1:
-                length = len(morse_last_line[-1]) + len(morse_last_line[-2]) + 1
-            else:
-                length = len(morse_last_line[-1])
+            # morse_groups = morse_last_line[-1].split("  ")
+            # if len(morse_last_line) > 1:
+            #     length = len(morse_last_line[-1]) + len(morse_last_line[-2]) + 1
+            # else:
+            length = len(morse_last_line[-1])
+
+            logger.debug(f"{morse_last_line[-1]=} | {length=}")
+            logger.debug(f"{morse_last_line=}")
+
             self.text_filed_morse.setText(
                 self.text_filed_morse.toPlainText()[:-length]
             )
-            logger.debug(f"{morse_groups[-1]=} | {morse_groups[-2] + ' | ' if len(morse_groups) > 1 else ''}{length=}")
-            logger.debug(f"{morse_groups=}")
+
         elif "......" in morse_last_group[-6:]:
             logger.debug(f"start: {morse_last_line=}")
             logger.debug(f"6 dots in {morse_last_group[-6:]=}")
-            if len(morse_last_line) > 1:
-                length = len(morse_last_line[-1]) + len(morse_last_line[-2]) + 1
-            else:
-                length = len(morse_last_line[-1])
+            # if len(morse_last_line) > 1:
+            #     length = len(morse_last_line[-1]) + len(morse_last_line[-2]) + 1
+            # else:
+            length = len(morse_last_line[-1])
+
+            logger.debug(f"{morse_last_line[-1]=} | {length=}")
+            logger.debug(f"{morse_last_line=}")
+
             self.text_filed_morse.setText(
                 self.text_filed_morse.toPlainText()[:-length])
         else:
-            logger.debug("just new symbol or word")
+            # logger.debug("just new symbol or word")
             self.text_filed_morse.setText(
                 self.text_filed_morse.toPlainText()[:] + whitespace)
 
