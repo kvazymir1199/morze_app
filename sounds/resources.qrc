@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>blip3.wav</file>
+    </qresource>
+</RCC>

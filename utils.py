@@ -1,5 +1,7 @@
 import random
 import time
+from typing import Optional
+
 from PySide2.QtGui import QFont
 from PySide2.QtWidgets import QTextEdit, QPushButton, QLabel, QSizePolicy
 from PySide2.QtCore import QElapsedTimer, Qt
@@ -10,13 +12,14 @@ MORSE_CODE_DICT = {'а': '.-', 'б': '-...', 'в': '.--', 'г': '--.', 'д': '-.
                    'н': '-.', 'о': '---', 'п': '.--.',
                    'р': '.-.', 'с': '...', 'у': '..-', 'ф': '..-.',
                    'х': '....', 'ц': '-.-.', 'ч': '---.',
-                   'ш': '----', 'щ': '--.-', 'ъ': '--.--', 'ы': '-.--',
+                   'ш': '----', 'щ': '--.-', 'ы': '-.--',
                    'ь': '-..-', 'э': '..-..', 'ю': '..--', 'я': '.-.-',
                    '0': '-', '1': '.----', '2': '..---', '3': '...--',
                    '4': '....-', '5': '.....', '6': '-....', '7': '--...',
                    '8': '---..', '9': '----.', '   ': '',
                    }
-RUSSIAN_LETTERS = [chr(i) for i in range(1072, 1104)]
+EXCLUDED_RUSSIAN_LETTERS = ['т', 'ъ']
+RUSSIAN_LETTERS = [chr(i) for i in range(1072, 1104) if chr(i) not in EXCLUDED_RUSSIAN_LETTERS]
 DIGITS = list(map(str, range(10)))
 STRING_LENGTH = 5
 
@@ -30,19 +33,20 @@ def create_textfield(parent, func=None):
     return label
 
 
-def create_button(parent, name, func):
+def create_button(parent, name, func, **kwargs):
     """Функция для создания кнопки"""
     button = QPushButton(name, parent=parent)
     if func is not None:
         button.clicked.connect(func)
+
     button.setStyleSheet("QPushButton {border: 1px solid; border-radius: 2px;}")
     button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     return button
 
 
-def create_button_by_cls(parent, cls, name, func):
+def create_button_by_cls(parent, cls, name, func, *args, **kwargs):
     """Функция для создания кнопки любого типа"""
-    button = cls(name, parent=parent)
+    button = cls(name, parent=parent, *args, **kwargs)
     if func is not None:
         button.clicked.connect(func)
     button.setStyleSheet("QPushButton {border: 1px solid; border-radius: 3px;}")
@@ -118,29 +122,14 @@ class CustomPushButton(QPushButton):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self.parent.last_time_button_pressed != 0:
-                if time.time() - self.parent.last_time_button_pressed > 1.05:
-                    if self.parent.text_filed_morse.toPlainText()[-1] != "   ":
-                        self.parent.text_filed_morse.setText(
-                            self.parent.text_filed_morse.toPlainText() + "  ")
-                elif time.time() - self.parent.last_time_button_pressed > 0.45:
-                    if len(self.parent.text_filed_morse.toPlainText()[-1]) > 0 and \
-                            self.parent.text_filed_morse.toPlainText()[-1] != " ":
-                        self.parent.text_filed_morse.setText(
-                            self.parent.text_filed_morse.toPlainText() + " ")
+            self.parent.handle_key_press_event()
+
         self.parent.key_press_time = time.time()
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.parent.last_time_button_pressed = time.time()
-            total_push_time = self.parent.last_time_button_pressed - self.parent.key_press_time
-            if 0.15 < total_push_time <= 0.45:
-                self.parent.text_filed_morse.setText(
-                    self.parent.text_filed_morse.toPlainText() + "-")
-            elif total_push_time <= 0.15:
-                self.parent.text_filed_morse.setText(
-                    self.parent.text_filed_morse.toPlainText() + ".")
+            self.parent.handle_key_release_event()
         super().mouseReleaseEvent(event)
 
 

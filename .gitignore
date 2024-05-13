@@ -1,4 +1,3 @@
-test.py
 main.spec
 myfirstfile.txt
 test_variant_2
@@ -9,3 +8,4 @@ venv/
 test.txt
 test1
 **/__pycache__/
+*.spec
